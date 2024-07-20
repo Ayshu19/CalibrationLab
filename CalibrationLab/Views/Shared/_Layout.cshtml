@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - CalibrationLab</title>
     <link rel="stylesheet" href="~/css/site.css" />
+    @RenderSection("Styles", required: false)
 </head>
 <body>
     <div class="wrapper">
         <div class="sidebar">
-            <div class="sidebar-heading">Sidebar</div>
+            <div class="sidebar-heading">CalibrationLab</div>
             <ul class="sidebar-menu">
                 <li><a href="#">Dashboard</a></li>
                 <li>
@@ -55,5 +56,6 @@
         </div>
     </div>
     <script src="~/js/site.js"></script>
+    @RenderSection("Scripts", required: false)
 </body>
 </html>
