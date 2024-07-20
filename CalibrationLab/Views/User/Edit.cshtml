@@ -1,1 +1,53 @@
-﻿
+﻿@model CalibrationLab.Models.User
+
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/user.css" />
+}
+
+<div class="form-container">
+    <h2>Edit User</h2>
+
+    <!-- Search Box -->
+    <div class="search-box">
+        <input id="searchEmployeeId" type="text" placeholder="Enter Employee ID" class="form-control" />
+        <button id="searchButton" class="btn btn-primary">
+            <i class="fa fa-search"></i> Search
+        </button>
+    </div>
+
+    <!-- Edit Form -->
+    <div id="editFormContainer" style="display:none;">
+        <form id="editUserForm" asp-action="UpdateUser" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label asp-for="Name"></label>
+                <input asp-for="Name" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="EmployeeId"></label>
+                <input asp-for="EmployeeId" class="form-control" readonly />
+            </div>
+            <div class="form-group">
+                <label asp-for="Mail"></label>
+                <input asp-for="Mail" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Password"></label>
+                <input asp-for="Password" type="password" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Signature">Signature</label>
+                <input asp-for="Signature" type="file" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+    <script src="~/js/edit-user.js"></script>
+}
