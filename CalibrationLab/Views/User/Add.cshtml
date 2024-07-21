@@ -1,6 +1,4 @@
-﻿@model CalibrationLab.Models.User
-
-@{
+﻿@{
     ViewData["Title"] = "Create User";
 }
 
@@ -8,29 +6,32 @@
     <link rel="stylesheet" href="~/css/user.css" />
 }
 
-<div class="form-container">
-    <h2>Create User</h2>
-    <form asp-action="AddUser" method="post" enctype="multipart/form-data">
+<div class="container">
+    <div id="addUserDiv">
         <div class="form-group">
-            <label asp-for="Name"></label>
-            <input asp-for="Name" class="form-control" />
+            <label for="name">Name</label>
+            <input id="name" type="text" name="name" class="form-control" />
         </div>
         <div class="form-group">
-            <label asp-for="EmployeeId"></label>
-            <input asp-for="EmployeeId" class="form-control" />
+            <label for="employeeid">Employee ID</label>
+            <input id="employeeid" type="text" name="employeeid" class="form-control" />
         </div>
         <div class="form-group">
-            <label asp-for="Mail"></label>
-            <input asp-for="Mail" class="form-control" />
+            <label for="mail">Mail</label>
+            <input id="mail" name="mail" type="email" class="form-control" />
         </div>
         <div class="form-group">
-            <label asp-for="Password"></label>
-            <input asp-for="Password" type="password" class="form-control" />
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" class="form-control" />
         </div>
         <div class="form-group">
-            <label asp-for="Signature">Signature</label>
-            <input asp-for="Signature" type="file" class="form-control" />
+            <label for="signature">Signature</label>
+            <input id="signature" name="signature" type="file" class="form-control" />
         </div>
-        <button type="submit" class="btn btn-primary">Create</button>
-    </form>
+        <button id="submitBtn" class="btn btn-primary">Create</button>
+    </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/user/add-user.js"></script>
+}

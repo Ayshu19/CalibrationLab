@@ -2,6 +2,6 @@
 {
     public static class Constants
     {
-        public const string ConnectionString = "server=your_server;user=your_user;password=your_password;database=your_database;";
+        public const string ConnectionString = "server=localhost;user=root;password=Ajith97902$;database=calibration;";
     }
 }
