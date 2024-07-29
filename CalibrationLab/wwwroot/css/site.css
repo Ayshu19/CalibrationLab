@@ -4,19 +4,14 @@ body {
     font-family: Arial, sans-serif;
 }
 
-.wrapper {
-    display: flex;
-}
-
 /* Sidebar styles */
 .sidebar {
     width: 250px;
+    height: -webkit-fill-available;
     background-color: #f8f9fa;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    padding-top: 200px;
+    height: 41%;
+    padding: 5% 0px;
+    position: absolute;
     border-right: 1px solid #ddd;
 }
 
@@ -62,8 +57,6 @@ body {
 /* Main content styles */
 .main-content {
     margin-left: 250px;
-    padding: 2px;
-    width: 100%;
 }
 
 /* Top navigation styles */
@@ -73,6 +66,9 @@ body {
     height: 200px;
     border: solid 1px;
     text-align: center;
+    padding: 2px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
     .topnav img {

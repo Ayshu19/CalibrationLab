@@ -8,48 +8,52 @@
     @RenderSection("Styles", required: false)
 </head>
 <body>
-    <div class="wrapper">
-        <div class="sidebar">
-            <ul class="sidebar-menu">
-                <li>
-                    <a href="#" class="dropdown-toggle">
-                        User <span class="icon">+</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a asp-controller="User" asp-action="Add">Add</a></li>
-                        <li><a asp-controller="User" asp-action="Edit">Edit</a></li>
-                        <li><a asp-controller="User" asp-action="Delete">Delete</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#" class="dropdown-toggle">
-                        Model Add <span class="icon">+</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">Transducer</a></li>
-                        <li><a href="#">Transmitter</a></li>
-                        <li><a href="#">Calibration</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#" class="dropdown-toggle">
-                        Facility <span class="icon">+</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">Download</a></li>
-                        <li><a href="#">Request</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-        <div class="main-content">
-            <nav class="topnav">
-                <img src="~/images/logo.jpeg" />
-            </nav>
-            <h1>Calibration Lab</h1>
-            <div class="content">
-                @RenderBody()
-            </div>
+    <nav class="topnav">
+        <img src="~/images/logo.jpeg" />
+    </nav>
+    <div class="sidebar">
+        <ul class="sidebar-menu">
+            <li>
+                <a href="#" class="dropdown-toggle">
+                    User <span class="icon">+</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a asp-controller="User" asp-action="Add">Add</a></li>
+                    <li><a asp-controller="User" asp-action="Edit">Edit</a></li>
+                    <li><a asp-controller="User" asp-action="Delete">Delete</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#" class="dropdown-toggle">
+                    Model Add <span class="icon">+</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="#">Transducer</a></li>
+                    <li><a href="#">Transmitter</a></li>
+                    <li><a href="#">Calibration</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#" class="dropdown-toggle">
+                    Calibration
+                </a>
+            </li>
+            <li>
+                <a href="#" class="dropdown-toggle">
+                    Facility <span class="icon">+</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="#">Download</a></li>
+                    <li><a href="#">Request</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    <div class="main-content">
+
+        <h1>Calibration Lab</h1>
+        <div class="content">
+            @RenderBody()
         </div>
     </div>
     <script src="~/js/site.js"></script>
