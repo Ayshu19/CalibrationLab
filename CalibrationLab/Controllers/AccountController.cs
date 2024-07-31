@@ -1,6 +1,5 @@
 namespace CalibrationLab.Controllers
 {
-
     using Microsoft.AspNetCore.Mvc;
 
 
@@ -12,6 +11,10 @@ namespace CalibrationLab.Controllers
 
         public IActionResult Login()
         {
+            if (User != null && User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
     }

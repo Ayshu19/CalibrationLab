@@ -2,10 +2,8 @@ namespace CalibrationLab.Controllers
 {
 
     using CalibrationLab.Models;
-    using CalibrationLab.Utilities;
     using Microsoft.AspNetCore.Mvc;
     using MySql.Data.MySqlClient;
-    using System.Data.Common;
 
 
     [ApiController]
@@ -15,7 +13,6 @@ namespace CalibrationLab.Controllers
 
         private readonly ILogger<UserAPIController> _logger = logger;
         private readonly string _connectionString = Constants.ConnectionString;
-        private readonly PasswordHelper _passwordHelper = new();
 
 
         [HttpPost("addUser")]
@@ -46,7 +43,7 @@ namespace CalibrationLab.Controllers
                 command.Parameters.AddWithValue("@Name", user.Name);
                 command.Parameters.AddWithValue("@EmployeeId", user.EmployeeId);
                 command.Parameters.AddWithValue("@Mail", user.Mail);
-                command.Parameters.AddWithValue("@Password", _passwordHelper.HashPassword(user.Password));
+                command.Parameters.AddWithValue("@Password", BCrypt.Net.BCrypt.HashPassword(user.Password, 12));
                 command.Parameters.AddWithValue("@Signature", user.Sign);
                 command.ExecuteNonQuery();
             }

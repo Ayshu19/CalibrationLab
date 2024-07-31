@@ -7,6 +7,6 @@
         public string Mail { get; set; }
         public string Password { get; set; }
         public IFormFile Signature { get; set; }
-        public byte[]? Sign {  get; set; }
+        public byte[]? Sign { get; set; }
     }
 }

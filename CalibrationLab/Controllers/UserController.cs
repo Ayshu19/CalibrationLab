@@ -1,18 +1,13 @@
 namespace CalibrationLab.Controllers
 {
-
-    using CalibrationLab.Models;
-    using CalibrationLab.Utilities;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
-
+    [Authorize]
     public class UserController(ILogger<UserController> logger) : Controller
     {
 
         private readonly ILogger<UserController> _logger = logger;
-        private readonly string _connectionString = Constants.ConnectionString;
-        private readonly PasswordHelper _passwordHelper = new();
-
 
         public IActionResult Add()
         {

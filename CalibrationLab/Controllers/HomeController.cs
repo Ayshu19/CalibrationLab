@@ -1,8 +1,9 @@
 namespace CalibrationLab.Controllers
 {
-
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
+    [Authorize]
 
     public class HomeController(ILogger<HomeController> logger) : Controller
     {
@@ -11,12 +12,6 @@ namespace CalibrationLab.Controllers
 
 
         public IActionResult Index()
-        {
-            return View();
-        }
-
-
-        public IActionResult Privacy()
         {
             return View();
         }
