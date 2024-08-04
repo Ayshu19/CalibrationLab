@@ -24,6 +24,25 @@ namespace CalibrationLab.Controllers
             }
             if (request.UserName == "admin" && request.Password == "Admin@123") //REMOVE
             {
+                List<Claim> claims = [
+                        new Claim(ClaimTypes.Name, request.UserName),
+                        new Claim(ClaimTypes.NameIdentifier, request.UserName)
+                    ];
+                ClaimsIdentity claimsIdentity = new(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                AuthenticationProperties authProperties = new()
+                {
+                    AllowRefresh = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30),
+                    IsPersistent = true,
+                    IssuedUtc = DateTimeOffset.UtcNow,
+                    RedirectUri = "/"
+                };
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    authProperties);
+
                 return Ok(new { IsSuccess = true, Message = "Login Successful!" });
             }
 
