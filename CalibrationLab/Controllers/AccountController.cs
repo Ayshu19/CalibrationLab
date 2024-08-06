@@ -1,5 +1,7 @@
 namespace CalibrationLab.Controllers
 {
+    using Microsoft.AspNetCore.Authentication.Cookies;
+    using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Mvc;
 
 
@@ -16,6 +18,14 @@ namespace CalibrationLab.Controllers
                 return RedirectToAction("Index", "Home");
             }
             return View();
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Login", "Account");
         }
     }
 }
