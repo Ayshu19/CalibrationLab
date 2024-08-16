@@ -4,33 +4,50 @@ namespace CalibrationLab.Controllers
     using CalibrationLab.Models;
     using Microsoft.AspNetCore.Mvc;
     using MySql.Data.MySqlClient;
-
+    using System.Data.Common;
 
     [ApiController]
     [Route("api/[controller]")]
-    public class UserAPIController(ILogger<UserAPIController> logger) : ControllerBase
+    public class UserAPIController(ILogger<UserAPIController> logger, IConfiguration configuration) : ControllerBase
     {
 
         private readonly ILogger<UserAPIController> _logger = logger;
-        private readonly string _connectionString = Constants.ConnectionString;
+        private readonly string? _connectionString = configuration.GetConnectionString("DefaultConnection");
 
 
         [HttpPost("addUser")]
         public async Task<IActionResult> AddUser([FromForm] User user)
         {
-
-            if (user.Signature != null)
-            {
-                using MemoryStream memoryStream = new();
-                await user.Signature.CopyToAsync(memoryStream);
-                user.Sign = memoryStream.ToArray();
-            }
             using (MySqlConnection connection = new(_connectionString))
             {
-                connection.Open();
-                using MySqlCommand command = new();
-                command.Connection = connection;
-                command.CommandText = @"
+                await connection.OpenAsync();
+                using (MySqlCommand checkUserCommand = new())
+                {
+                    checkUserCommand.Connection = connection;
+                    checkUserCommand.CommandText = @"
+                        SELECT COUNT(*) FROM users
+                        WHERE mail = @Mail OR employee_id = @EmployeeId
+                    ";
+                    checkUserCommand.Parameters.AddWithValue("@Mail", user.Mail);
+                    checkUserCommand.Parameters.AddWithValue("@EmployeeId", user.EmployeeId);
+                    int existingUserCount = Convert.ToInt32(await checkUserCommand.ExecuteScalarAsync());
+                    if (existingUserCount > 0)
+                    {
+                        return Conflict(new { Message = "User with this email or employee ID already exists." });
+                    }
+                }
+
+                if (user.Signature != null)
+                {
+                    using MemoryStream memoryStream = new();
+                    await user.Signature.CopyToAsync(memoryStream);
+                    user.Sign = memoryStream.ToArray();
+                }
+
+                using (MySqlCommand command = new())
+                {
+                    command.Connection = connection;
+                    command.CommandText = @"
                         INSERT INTO users (
                             name,
                             employee_id,
@@ -40,16 +57,37 @@ namespace CalibrationLab.Controllers
                         )
                         VALUES (@Name, @EmployeeId, @Mail, @Password, @Signature)
                     ";
-                command.Parameters.AddWithValue("@Name", user.Name);
-                command.Parameters.AddWithValue("@EmployeeId", user.EmployeeId);
-                command.Parameters.AddWithValue("@Mail", user.Mail);
-                command.Parameters.AddWithValue("@Password", BCrypt.Net.BCrypt.HashPassword(user.Password, 12));
-                command.Parameters.AddWithValue("@Signature", user.Sign);
-                command.ExecuteNonQuery();
+                    command.Parameters.AddWithValue("@Name", user.Name);
+                    command.Parameters.AddWithValue("@EmployeeId", user.EmployeeId);
+                    command.Parameters.AddWithValue("@Mail", user.Mail);
+                    command.Parameters.AddWithValue("@Password", BCrypt.Net.BCrypt.HashPassword(user.Password, 12));
+                    command.Parameters.AddWithValue("@Signature", user.Sign);
+                    await command.ExecuteNonQueryAsync();
+                }
             }
             return Ok();
         }
 
+
+        [HttpGet("getUser")]
+        public async Task<IActionResult> GetUser([FromQuery] string employeeId)
+        {
+            if (string.IsNullOrEmpty(employeeId))
+                return Ok(null);
+            User? user = await GetUserFromDb(employeeId);
+            if(user == null)
+            {
+                return NotFound();
+            }
+            string? base64String = user.Sign != null ? Convert.ToBase64String(user.Sign) : null;
+            return Ok(new
+            {
+                user.Name,
+                user.EmployeeId,
+                user.Mail,
+                Base64Image = base64String
+            });
+        }
 
         //[HttpPost]
         //public async Task<IActionResult> UpdateUser(User user)
@@ -70,15 +108,6 @@ namespace CalibrationLab.Controllers
         //    return Ok();
         //}
 
-
-        //[HttpGet]
-        //public async Task<IActionResult> GetUser(string employeeId)
-        //{
-        //    if (string.IsNullOrEmpty(employeeId))
-        //        return Ok(null);
-        //    User user = await GetUserFromDb(employeeId);
-        //    return Ok(user);
-        //}
 
 
         //private void UpdateUserDb(User user)
@@ -104,27 +133,27 @@ namespace CalibrationLab.Controllers
         //}
 
 
-        //private async Task<User> GetUserFromDb(string employeeId)
-        //{
-        //    using MySqlConnection connection = new(_connectionString);
-        //    await connection.OpenAsync();
+        private async Task<User?> GetUserFromDb(string employeeId)
+        {
+            using MySqlConnection connection = new(_connectionString);
+            await connection.OpenAsync();
 
-        //    using MySqlCommand command = new("SELECT * FROM users WHERE EmployeeId = @EmployeeId", connection);
-        //    command.Parameters.AddWithValue("@EmployeeId", employeeId);
+            using MySqlCommand command = new("SELECT * FROM users WHERE employee_id = @EmployeeId", connection);
+            command.Parameters.AddWithValue("@EmployeeId", employeeId);
 
-        //    using DbDataReader reader = await command.ExecuteReaderAsync();
-        //    if (await reader.ReadAsync())
-        //    {
-        //        return new User
-        //        {
-        //            Name = reader["Name"].ToString()!,
-        //            EmployeeId = reader["EmployeeId"].ToString()!,
-        //            Mail = reader["Mail"].ToString()!,
-        //            Password = reader["Password"].ToString()!,
-        //            Sign = (byte[])reader["Signature"]
-        //        };
-        //    }
-        //    return null;
-        //}
+            using DbDataReader reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                return new User
+                {
+                    Name = reader["name"].ToString()!,
+                    EmployeeId = reader["employee_id"].ToString()!,
+                    Mail = reader["mail"].ToString()!,
+                    Password = "Password",
+                    Sign = (byte[])reader["signature"]
+                };
+            }
+            return null;
+        }
     }
 }

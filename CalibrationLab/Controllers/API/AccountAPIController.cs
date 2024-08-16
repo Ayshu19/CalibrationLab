@@ -11,9 +11,9 @@ namespace CalibrationLab.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-    public class AccountAPIController : ControllerBase
+    public class AccountAPIController(IConfiguration configuration) : ControllerBase
     {
-        private readonly string _connectionString = Constants.ConnectionString;
+        private readonly string? _connectionString = configuration.GetConnectionString("DefaultConnection");
 
         [HttpPost("signIn")]
         public async Task<IActionResult> SignIn([FromForm] SignInRequest request)

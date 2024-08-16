@@ -74,6 +74,23 @@ body {
     .topnav img {
         height: 100%
     }
-    .main-content h1{
-        text-align: center;
-    }
+
+.main-content h1 {
+    text-align: center;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    position: relative;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.alert-danger {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}

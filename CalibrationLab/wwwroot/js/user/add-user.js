@@ -3,7 +3,7 @@
 
     submitBtn.addEventListener('click', function (event) {
         event.preventDefault(); // Prevent any default button behavior
-
+        hideErrorMessage()
         const name = document.getElementById('name').value;
         const employeeId = document.getElementById('employeeid').value;
         const mail = document.getElementById('mail').value;
@@ -15,7 +15,9 @@
         formData.append('employeeid', employeeId);
         formData.append('mail', mail);
         formData.append('password', password);
-        formData.append('signature', signature);
+        if (signature) {
+            formData.append('signature', signature);
+        }
 
         fetch('/api/UserAPI/addUser', {
             method: 'POST',
@@ -25,12 +27,25 @@
                 if (response.ok) {
                     alert('User added successfully.');
                 } else {
-                    return response.text().then(text => { throw new Error(text) });
+                    return response.json().then(json => {
+                        displayErrorMessage(json.message);
+                    });
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to add user.');
+                displayErrorMessage("Please enter valid details!");
             });
     });
 });
+
+function displayErrorMessage(message) {
+    const errorMessageDiv = document.getElementById('errorMessage');
+    errorMessageDiv.innerText = message;
+    errorMessageDiv.style.display = 'block';
+}
+
+function hideErrorMessage() {
+    const errorMessageDiv = document.getElementById('errorMessage');
+    errorMessageDiv.innerText = "";
+    errorMessageDiv.style.display = 'none';
+}

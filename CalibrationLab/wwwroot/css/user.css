@@ -72,3 +72,17 @@
         width: 100%;
     }
 }
+
+.search-box {
+    display: flex;
+    padding: 15px;
+}
+
+#imgSign {
+    border: solid;
+    max-width: 250px;
+}
+
+#editFormContainer{
+    padding: 15px
+}
