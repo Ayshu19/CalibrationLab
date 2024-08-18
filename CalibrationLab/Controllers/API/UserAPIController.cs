@@ -6,6 +6,7 @@ namespace CalibrationLab.Controllers
     using MySql.Data.MySqlClient;
     using System.Data.Common;
 
+
     [ApiController]
     [Route("api/[controller]")]
     public class UserAPIController(ILogger<UserAPIController> logger, IConfiguration configuration) : ControllerBase
@@ -82,6 +83,7 @@ namespace CalibrationLab.Controllers
             string? base64String = user.Sign != null ? Convert.ToBase64String(user.Sign) : null;
             return Ok(new
             {
+                user.Id,
                 user.Name,
                 user.EmployeeId,
                 user.Mail,
@@ -89,48 +91,91 @@ namespace CalibrationLab.Controllers
             });
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> UpdateUser(User user)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        byte[]? signByte = null;
-        //        if (user.Signature != null)
-        //        {
-        //            using MemoryStream memoryStream = new();
-        //            await user.Signature.CopyToAsync(memoryStream);
-        //            signByte = memoryStream.ToArray();
-        //        }
-        //        user.Password = new PasswordHelper().HashPassword(user.Password);
-        //        UpdateUserDb(user);
-        //        return RedirectToAction("Index"); // Redirect to a different view after successful update
-        //    }
-        //    return Ok();
-        //}
 
+        [HttpPost("updateUser")]
+        public async Task<IActionResult> UpdateUser([FromForm] User user)
+        {
+            using (MySqlConnection connection = new(_connectionString))
+            {
+                await connection.OpenAsync();
+                using (MySqlCommand checkUserCommand = new())
+                {
+                    checkUserCommand.Connection = connection;
+                    checkUserCommand.CommandText = @"
+                        SELECT COUNT(*)
+                        FROM users
+                        WHERE (mail = @Mail OR employee_id = @EmployeeId)
+                        AND id != @UserId
+                    ";
+                    checkUserCommand.Parameters.AddWithValue("@Mail", user.Mail);
+                    checkUserCommand.Parameters.AddWithValue("@EmployeeId", user.EmployeeId);
+                    checkUserCommand.Parameters.AddWithValue("@UserId", user.Id);
+                    int existingUserCount = Convert.ToInt32(await checkUserCommand.ExecuteScalarAsync());
+                    if (existingUserCount > 0)
+                    {
+                        return Conflict(new { Message = "User with this email or employee ID already exists." });
+                    }
+                }
 
+                if (user.Signature != null)
+                {
+                    using MemoryStream memoryStream = new();
+                    await user.Signature.CopyToAsync(memoryStream);
+                    user.Sign = memoryStream.ToArray();
+                    using (MySqlCommand command = new())
+                    {
+                        command.Connection = connection;
+                        command.CommandText = @"
+                        UPDATE users
+                        SET 
+                            signature = @Signature
+                        WHERE 
+                            id = @UserId
+                        ";
+                        command.Parameters.AddWithValue("@UserId", user.Id);
+                        command.Parameters.AddWithValue("@Signature", user.Sign);
+                        await command.ExecuteNonQueryAsync();
+                    }
+                }
 
-        //private void UpdateUserDb(User user)
-        //{
-        //    using MySqlConnection connection = new(_connectionString);
-        //    connection.Open();
-        //    using MySqlCommand command = new();
-        //    command.Connection = connection;
-        //    command.CommandText = @"
-        //            UPDATE users
-        //            SET name = @Name,
-        //                mail = @Mail,
-        //                password = @Password,
-        //                signature = @Signature
-        //            WHERE employee_id = @EmployeeId";
+                if (user.Password != null) {
+                    using (MySqlCommand command = new())
+                    {
+                        command.Connection = connection;
+                        command.CommandText = @"
+                        UPDATE users
+                        SET 
+                            password = @Password
+                        WHERE 
+                            id = @UserId
+                    ";
+                        command.Parameters.AddWithValue("@UserId", user.Id);
+                        command.Parameters.AddWithValue("@Password", BCrypt.Net.BCrypt.HashPassword(user.Password, 12));
+                        await command.ExecuteNonQueryAsync();
+                    }
+                }
 
-        //    command.Parameters.AddWithValue("@Name", user.Name);
-        //    command.Parameters.AddWithValue("@Mail", user.Mail);
-        //    command.Parameters.AddWithValue("@Password", user.Password);
-        //    command.Parameters.AddWithValue("@Signature", user.Signature);
-        //    command.Parameters.AddWithValue("@EmployeeId", user.EmployeeId);
-        //    command.ExecuteNonQuery();
-        //}
+                using (MySqlCommand command = new())
+                {
+                    command.Connection = connection;
+                    command.CommandText = @"
+                        UPDATE users
+                        SET 
+                            name = @Name,
+                            mail = @Mail,
+                            employee_id = @EmployeeId
+                        WHERE 
+                            id = @UserId
+                    ";
+                    command.Parameters.AddWithValue("@UserId", user.Id);
+                    command.Parameters.AddWithValue("@Name", user.Name);
+                    command.Parameters.AddWithValue("@EmployeeId", user.EmployeeId);
+                    command.Parameters.AddWithValue("@Mail", user.Mail);
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
+            return Ok();
+        }
 
 
         private async Task<User?> GetUserFromDb(string employeeId)
@@ -146,6 +191,7 @@ namespace CalibrationLab.Controllers
             {
                 return new User
                 {
+                    Id = (int)reader["id"],
                     Name = reader["name"].ToString()!,
                     EmployeeId = reader["employee_id"].ToString()!,
                     Mail = reader["mail"].ToString()!,
