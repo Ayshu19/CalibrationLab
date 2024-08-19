@@ -1,0 +1,27 @@
+Explanation:
+Initialization:
+
+The adi.ad7124(uri="local:") initializes the AD7124-4 device. The uri="local:" parameter is used when the ADC is connected locally to the Raspberry Pi.
+Sample Rate:
+
+adc.sample_rate sets the sampling rate of the ADC. Adjust this based on your application's needs.
+Channel Configuration:
+
+adc.channel[0].enabled = True enables channel 0 of the AD7124-4. You can enable additional channels by modifying the channel index.
+Reading Raw Data:
+
+adc.channel[0].voltage.raw retrieves the raw ADC data from channel 0.
+Voltage Conversion:
+
+convert_to_voltage function converts the raw ADC value to a voltage using the reference voltage and ADC scale.
+Main Loop:
+
+The loop continuously reads data from the ADC, converts it to voltage, and prints it out. The loop runs until the user interrupts it (e.g., with Ctrl+C).
+Cleanup:
+
+The adc.rx_destroy() function is called in the finally block to ensure the proper cleanup of resources.
+Notes:
+Scale Factor: The adc.scale property is used to convert the raw ADC data to a voltage. This value typically corresponds to the maximum ADC output value, depending on the ADC configuration (e.g., unipolar/bipolar).
+Reference Voltage: The adc.reference_voltage should match the reference voltage used in your hardware setup.
+Channel Configuration: Depending on your use case, you may need to configure the gain, filter settings, and other parameters for each channel. The pyadi-iio library provides methods to access and modify these settings.
+This code gives you a starting point to read analog voltages from the AD7124-4 using the libiio and pyadi-iio libraries on a Raspberry Pi.

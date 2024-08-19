@@ -1,0 +1,45 @@
+import adi
+import numpy as np
+import time
+
+# Initialize the AD7124-4 device
+adc = adi.ad7124(uri="local:")
+
+# Set the desired sample rate (Optional)
+adc.sample_rate = 1000  # 1 kSPS
+
+# Enable one of the channels (e.g., Channel 0)
+adc.channel[0].enabled = True
+
+# Set the reference voltage (Optional, depending on your setup)
+adc.reference_voltage = 2.5
+
+# Function to convert raw ADC data to voltage
+def convert_to_voltage(raw_value, vref, scale):
+    # Calculate voltage from raw ADC data
+    voltage = (raw_value / scale) * vref
+    return voltage
+
+def main():
+    try:
+        while True:
+            # Capture data from the ADC
+            raw_data = adc.channel[0].voltage.raw  # Read raw data from channel 0
+
+            # Convert the raw ADC data to voltage
+            voltage = convert_to_voltage(raw_data, adc.reference_voltage, adc.scale)
+
+            # Print the result
+            print(f"Raw Data: {raw_data}, Voltage: {voltage:.6f} V")
+
+            # Wait for a short period
+            time.sleep(1)
+
+    except KeyboardInterrupt:
+        print("Program interrupted by user.")
+
+    finally:
+        adc.rx_destroy()
+
+if __name__ == "__main__":
+    main()
