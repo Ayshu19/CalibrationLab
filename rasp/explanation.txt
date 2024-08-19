@@ -1,0 +1,24 @@
+Explanation:
+SPI Configuration:
+
+The SPI bus and chip select (CS) are opened using spi.open(0, 0) where 0, 0 indicates bus 0 and CS 0.
+spi.max_speed_hz is set to 500kHz, a typical speed for ADCs.
+spi.mode is set to 0b01, which corresponds to SPI mode 1 (CPOL=0, CPHA=1).
+Register Read/Write:
+
+write_register sends data to a specified register.
+read_register reads data from a specified register, with the default length being 2 bytes.
+Reading ADC Data:
+
+The read_adc_data function reads the 3-byte ADC conversion result from the data register and converts it to a signed integer value (assuming the ADC is in bipolar mode).
+Voltage Conversion:
+
+convert_to_voltage converts the raw ADC value into a voltage. This function assumes a bipolar input configuration, where the full-scale range of the ADC corresponds to ±V_REF.
+Main Loop:
+
+The main loop reads ADC data continuously, converts it to voltage, and prints both the raw ADC value and the corresponding voltage every second.
+Notes:
+V_REF: The reference voltage (V_REF) should be set according to your specific hardware configuration. For example, if you are using a 2.5V reference, this value should be set accordingly.
+Bipolar/Unipolar Mode: This example assumes a bipolar input mode. If you are using unipolar mode, you might need to adjust the voltage conversion formula.
+Filter and Gain Settings: Depending on your application, you may want to configure the ADC's filter and gain settings by writing to the appropriate registers. These settings are detailed in the AD7124-4 datasheet.
+This code should provide a basic starting point for interfacing with the AD7124-4 and reading analog voltage values.

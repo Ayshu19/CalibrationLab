@@ -1,0 +1,65 @@
+import spidev
+import time
+
+# AD7124-4 Register Addresses (Refer to datasheet for the complete list)
+AD7124_COMM_REG = 0x00
+AD7124_STATUS_REG = 0x00
+AD7124_DATA_REG = 0x04
+AD7124_IO_CTRL1_REG = 0x06
+AD7124_ID_REG = 0x07
+AD7124_CONFIG_0 = 0x19
+
+# AD7124 Commands
+READ_FLAG = 0x40
+WRITE_FLAG = 0x00
+
+# ADC Parameters
+ADC_MAX_VALUE = 0xFFFFFF  # 24-bit ADC
+V_REF = 2.5  # Reference voltage (you may need to adjust this based on your setup)
+
+# SPI Setup
+spi = spidev.SpiDev()
+spi.open(0, 0)  # Open SPI bus 0, device (CS) 0
+spi.max_speed_hz = 500000  # Set SPI speed to 500kHz
+spi.mode = 0b01  # SPI mode (CPOL=0, CPHA=1)
+
+def write_register(register, value):
+    # Writing to a register
+    msg = [WRITE_FLAG | (register & 0x3F), value >> 8, value & 0xFF]
+    spi.xfer2(msg)
+
+def read_register(register, length=2):
+    # Reading from a register
+    msg = [READ_FLAG | (register & 0x3F)] + [0x00] * length
+    response = spi.xfer2(msg)
+    return response[1:]  # First byte is just the register address sent
+
+def read_adc_data():
+    # Reading ADC conversion data (3 bytes)
+    data = read_register(AD7124_DATA_REG, 3)
+    raw_value = (data[0] << 16) | (data[1] << 8) | data[2]
+    
+    # Convert raw value to signed integer (assuming bipolar mode)
+    if raw_value & 0x800000:
+        raw_value -= 0x1000000
+
+    return raw_value
+
+def convert_to_voltage(adc_value):
+    # Convert ADC value to voltage
+    voltage = (adc_value / ADC_MAX_VALUE) * V_REF * 2  # Multiply by 2 for bipolar range
+    return voltage
+
+def main():
+    # Example: Writing to IO_CONTROL1 register to enable the analog inputs
+    write_register(AD7124_IO_CTRL1_REG, 0x0000)
+
+    while True:
+        # Read ADC data
+        adc_value = read_adc_data()
+        voltage = convert_to_voltage(adc_value)
+        print(f"ADC Value: {adc_value}, Voltage: {voltage:.6f} V")
+        time.sleep(1)
+
+if __name__ == "__main__":
+    main()
