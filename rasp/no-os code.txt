@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include "ad7124.h"
+#include "platform_drivers.h"
+
+// SPI initialization parameters
+struct ad7124_dev *adc;
+struct ad7124_init_param ad7124_param = {
+    .spi_init = {
+        .chip_select = 0, // SPI Chip Select (CS)
+        .max_speed_hz = 500000, // SPI speed 500kHz
+        .mode = SPI_MODE_3 // SPI Mode 3 (CPOL=1, CPHA=1)
+    },
+    .spi_rdy_poll_cnt = 25000
+};
+
+// Function to read voltage from a specific channel
+double read_voltage(int channel) {
+    int32_t raw_data;
+    double voltage;
+
+    // Select the desired channel
+    ad7124_write_register(adc, AD7124_Channel_0 + channel);
+
+    // Read the ADC raw data
+    ad7124_read_data(adc, &raw_data);
+
+    // Convert raw ADC data to voltage
+    voltage = (double)raw_data / (double)0xFFFFFF * 2.5; // Assuming a 2.5V reference
+
+    return voltage;
+}
+
+int main() {
+    int ret;
+    double voltage;
+
+    // Initialize the AD7124 device
+    ret = ad7124_setup(&adc, ad7124_param);
+    if (ret != 0) {
+        printf("AD7124 setup failed!\n");
+        return -1;
+    }
+
+    while (1) {
+        // Read voltage from channel 0
+        voltage = read_voltage(0);
+        printf("Channel 0 Voltage: %.6f V\n", voltage);
+
+        // Add delay
+        usleep(1000000); // 1 second delay
+    }
+
+    // Cleanup and shutdown
+    ad7124_remove(adc);
+    return 0;
+}
